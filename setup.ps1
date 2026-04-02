@@ -68,27 +68,26 @@ if (Test-Path $settingsPath) {
 # Hook configuration
 $hookDetectorPath = Join-Path $projectRoot "src\hook-detector.js"
 $hookCommand = "node `"$hookDetectorPath`""
-$hookConfig = @{
-  type = "command"
-  command = $hookCommand
-  timeout = 5
+$hookEntry = @{
+  matcher = ""
+  hooks = @(@{ type = "command"; command = $hookCommand; timeout = 5 })
 }
 
-# Add hooks to PostToolUse
-$PostToolUseArray = @()
-if ($settings.hooks.PostToolUse) {
-  $PostToolUseArray = @($settings.hooks.PostToolUse)
+# Helper: add hook only if not already present (prevents duplicates on re-run)
+function Add-HookIfMissing($existing, $entry) {
+  if ($existing) {
+    $arr = @($existing)
+    $alreadyExists = $arr | Where-Object { $_.hooks -and $_.hooks[0].command -eq $entry.hooks[0].command }
+    if ($alreadyExists) { return $arr }
+    return $arr + $entry
+  }
+  return @($entry)
 }
-$PostToolUseArray += $hookConfig
-$settings.hooks | Add-Member -NotePropertyName "PostToolUse" -NotePropertyValue $PostToolUseArray -Force
 
-# Add hooks to Stop
-$StopArray = @()
-if ($settings.hooks.Stop) {
-  $StopArray = @($settings.hooks.Stop)
-}
-$StopArray += $hookConfig
-$settings.hooks | Add-Member -NotePropertyName "Stop" -NotePropertyValue $StopArray -Force
+$settings.hooks | Add-Member -NotePropertyName "PostToolUse" `
+  -NotePropertyValue (Add-HookIfMissing $settings.hooks.PostToolUse $hookEntry) -Force
+$settings.hooks | Add-Member -NotePropertyName "Stop" `
+  -NotePropertyValue (Add-HookIfMissing $settings.hooks.Stop $hookEntry) -Force
 
 # Write settings.json
 try {
