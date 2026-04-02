@@ -1,0 +1,7 @@
+node_modules/
+state.json
+message-count.json
+logs/
+start-tray.bat
+claude-plugins-official/
+.claude/

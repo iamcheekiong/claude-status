@@ -1,0 +1,19 @@
+{
+  "name": "claude-status",
+  "version": "2.0.0",
+  "description": "Claude usage renewal notifications for Windows (event-driven)",
+  "main": "src/notify.js",
+  "scripts": {
+    "setup": "powershell.exe -ExecutionPolicy Bypass -File setup.ps1",
+    "uninstall": "powershell.exe -ExecutionPolicy Bypass -File uninstall.ps1",
+    "status": "node src/notify.js --status",
+    "hit-5h": "node src/notify.js --hit-now 5h",
+    "hit-weekly": "node src/notify.js --hit-now weekly",
+    "clear": "node src/notify.js --clear",
+    "tray": "node src/tray.js"
+  },
+  "dependencies": {
+    "node-notifier": "^10.0.1",
+    "systray2": "^2.1.4"
+  }
+}
